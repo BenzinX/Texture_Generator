@@ -254,6 +254,7 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
         ImGui::BulletText("D/H/N/R - View mode");
         ImGui::BulletText("E - export to .ppm");
         ImGui::BulletText("Space - regenerate");
+        ImGui::BulletText("V - 3D View");
     }
 
     ImGui::End();

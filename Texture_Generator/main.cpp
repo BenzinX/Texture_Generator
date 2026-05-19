@@ -22,6 +22,7 @@
 #include <iostream>
 #include <chrono>
 #include <format>
+#include <algorithm>
 #include <string>
 
 // ============================================================================
@@ -38,13 +39,14 @@ static void handleHotkeys(GLFWwindow* window,
                            GeneratorParams& params,
                            int& viewMode,
                            bool& needsRegen,
-                           bool& wantsExport)
+                           bool& wantsExport,
+                           bool& show3DPreview)
 {
     // Игнорируем горячие клавиши, если ImGui захватил клавиатуру
     if (ImGui::GetIO().WantCaptureKeyboard) return;
 
     // 1–4: выбор материала
-    static bool keyWasDown[10] = {};
+    static bool keyWasDown[12] = {};
     auto checkKey = [&](int key, int idx) -> bool {
         bool down = glfwGetKey(window, key) == GLFW_PRESS;
         bool pressed = down && !keyWasDown[idx];
@@ -68,6 +70,11 @@ static void handleHotkeys(GLFWwindow* window,
 
     // E: экспорт PPM
     if (checkKey(GLFW_KEY_E, 9)) wantsExport = true;
+
+    // V (View)
+    if (checkKey(GLFW_KEY_V, 10)) {
+        show3DPreview = !show3DPreview;
+    }
 }
 
 // ============================================================================
@@ -96,6 +103,22 @@ int main()
         bool needsRegen = true;   // Генерируем сразу при старте
         bool wantsExport = false;
 
+        // --- Переключатель режимов ---
+        bool show3DPreview = false;
+
+        // --- Параметры орбитальной камеры ---
+        float camTheta = 45.0f;   // азимут в градусах [0, 360]
+        float camPhi   = 60.0f;   // полярный угол в градусах [5, 175]
+        float camDist  = 2.5f;    // расстояние от центра [0.5, 10]
+
+        // --- Параметры источника света ---
+        LightParams light;        // инициализируется default-значениями из Renderer.h
+
+        // --- Состояние перетаскивания мышью (орбит-камера) ---
+        bool   s_dragging    = false;
+        double s_lastMouseX  = 0.0;
+        double s_lastMouseY  = 0.0;
+
         PBRMaps maps;
 
         // Callback экспорта PPM
@@ -105,8 +128,35 @@ int main()
         while (!renderer.shouldClose()) {
             renderer.pollEvents();
 
+            // Drag работает только в 3D-режиме, когда ImGui не захватил мышь
+            if (show3DPreview && !ImGui::GetIO().WantCaptureMouse) {
+                if (glfwGetMouseButton(renderer.window(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+                    double mx, my;
+                    glfwGetCursorPos(renderer.window(), &mx, &my);
+                    if (!s_dragging) {
+                        s_dragging   = true;
+                        s_lastMouseX = mx;
+                        s_lastMouseY = my;
+                    } else {
+                        // 0.3 deg/px — достаточно чувствительно для орбиты
+                        camTheta += static_cast<float>((mx - s_lastMouseX) * 0.3);
+                        camPhi   += static_cast<float>((my - s_lastMouseY) * 0.3);
+                        camPhi    = std::clamp(camPhi, 5.0f, 175.0f);
+                        // theta оборачиваем в [0, 360]
+                        while (camTheta <   0.0f) camTheta += 360.0f;
+                        while (camTheta > 360.0f) camTheta -= 360.0f;
+                        s_lastMouseX = mx;
+                        s_lastMouseY = my;
+                    }
+                } else {
+                    s_dragging = false;
+                }
+            } else {
+                s_dragging = false;  // сброс при переключении режима
+            }
+
             // --- Горячие клавиши ---
-            handleHotkeys(renderer.window(), params, viewMode, needsRegen, wantsExport);
+            handleHotkeys(renderer.window(), params, viewMode, needsRegen, wantsExport, show3DPreview);
 
             // --- Перегенерация текстур (CPU) ---
             if (needsRegen) {
@@ -140,10 +190,72 @@ int main()
 
             // --- Рендеринг ---
             renderer.clear(0.08f, 0.08f, 0.08f);
-            renderer.drawQuad(viewMode);
+
+            if (show3DPreview) {
+                renderer.drawPBRScene(camDist, camTheta, camPhi, light);
+            } else {
+                renderer.drawQuad(viewMode);
+            }
 
             // --- ImGui ---
             panel.beginFrame();
+            ImGui::SetNextWindowPos(ImVec2(360.0f, 10.0f), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(340.0f, 0.0f), ImGuiCond_FirstUseEver);
+
+            ImGuiWindowFlags pbrFlags = ImGuiWindowFlags_NoScrollbar
+                                      | ImGuiWindowFlags_AlwaysAutoResize;
+
+            if (ImGui::Begin("3D PBR Preview", nullptr, pbrFlags)) {
+
+                // --- Переключатель режима ---
+                ImGui::SeparatorText("View Mode");
+                ImGui::Checkbox("Enable 3D Preview", &show3DPreview);
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("Переключение между 2D картами и 3D-превью на сфере.\n"
+                                      "Drag левой кнопкой мыши для вращения камеры.");
+
+                if (show3DPreview) {
+
+                    ImGui::Spacing();
+                    ImGui::SeparatorText("Orbital Camera");
+
+                    ImGui::SliderFloat("Distance",    &camDist,  0.5f, 10.0f, "%.2f");
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Расстояние камеры от центра сцены.");
+
+                    ImGui::SliderFloat("Azimuth (θ)", &camTheta, 0.0f, 360.0f, "%.1f°");
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Горизонтальное вращение камеры.\nТакже управляется drag мышью.");
+
+                    ImGui::SliderFloat("Elevation (φ)", &camPhi, 5.0f, 175.0f, "%.1f°");
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Вертикальный наклон камеры.\nОграничен от полюсов (5–175°).");
+
+                    ImGui::Spacing();
+                    ImGui::SeparatorText("Light");
+
+                    ImGui::DragFloat3("Position", light.position, 0.05f, -20.0f, 20.0f, "%.2f");
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Позиция point light в мировых координатах.");
+
+                    ImGui::ColorEdit3("Color", light.color);
+                    ImGui::SliderFloat("Intensity", &light.intensity, 0.1f, 100.0f, "%.1f");
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Мощность источника (в условных ваттах).\n"
+                                          "Высокие значения дают видимые блики при большом расстоянии.");
+
+                    ImGui::Spacing();
+                    ImGui::SeparatorText("Ambient");
+                    ImGui::ColorEdit3("Ambient Color", light.ambient);
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Фоновый свет — заполняет тени.\n"
+                                          "Слишком высокий убивает контраст BRDF.");
+
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("LMB drag — orbit camera");
+                }
+            }
+            ImGui::End();
             if (panel.drawPanel(params, viewMode)) {
                 needsRegen = true; // Изменились параметры → перегенерация
             }

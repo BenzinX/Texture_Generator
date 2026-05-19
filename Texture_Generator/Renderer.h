@@ -11,6 +11,16 @@
 #include <cstdint>
 #include "PBRGenerator.h"
 
+// Параметры единственного источника света (point light)
+// Выбор point light: даёт изменение интенсивности по сфере, что делает
+// блики и тени более информативными для оценки BRDF, чем directional.
+struct LightParams {
+    float position[3]  = { 3.0f, 5.0f, 3.0f };
+    float color[3]     = { 1.0f, 1.0f, 1.0f };
+    float intensity    = 20.0f;   // физическая интенсивность (ватты, условно)
+    float ambient[3]   = { 0.03f, 0.03f, 0.04f };
+};
+
 // ============================================================================
 // Renderer — управляет окном GLFW, шейдерами и GPU-ресурсами
 // ============================================================================
@@ -35,6 +45,9 @@ public:
     // mapMode: 0=Diffuse, 1=Height, 2=Normal, 3=Roughness
     void drawQuad(int mapMode);
 
+    void drawPBRScene(float camDist, float camTheta, float camPhi,
+                      const LightParams& light);
+
     // --- Доступ к окну ---
     [[nodiscard]] GLFWwindow* window() const noexcept { return m_window; }
     [[nodiscard]] bool shouldClose()   const noexcept {
@@ -56,6 +69,8 @@ private:
     GLuint compileShader(GLenum type, const char* src);
     GLuint linkProgram(GLuint vert, GLuint frag);
     void   createQuad();
+    void   loadPBRShader();
+    void   createSphere(int sectors = 32, int stacks = 24);
 
     // Создать/пересоздать текстуру OpenGL из CPU-буфера
     void createTexture(GLuint& texID,
@@ -67,6 +82,28 @@ private:
 
     // --- Поля ---
     GLFWwindow* m_window = nullptr;
+
+    // --- PBR шейдер ---
+    GLuint m_pbrShader     = 0;
+
+    // --- Меш сферы ---
+    GLuint  m_sphereVao    = 0;
+    GLuint  m_sphereVbo    = 0;
+    GLuint  m_sphereEbo    = 0;
+    GLsizei m_sphereIdxCnt = 0;  // количество индексов для glDrawElements
+
+    // --- Кэш uniform locations PBR шейдера ---
+    // (заполняется в loadPBRShader, используется в drawPBRScene)
+    struct {
+        GLint model    = -1;
+        GLint view     = -1;
+        GLint proj     = -1;
+        GLint viewPos  = -1;
+        GLint lightPos = -1;
+        GLint lightCol = -1;
+        GLint lightInt = -1;
+        GLint ambient  = -1;
+    } m_pbr;
 
     // Fullscreen quad
     GLuint m_vao = 0;
