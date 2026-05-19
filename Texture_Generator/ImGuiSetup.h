@@ -3,11 +3,23 @@
 // ImGuiSetup.h — Интерактивная панель редактора текстур (Dear ImGui)
 // ============================================================================
 
+#pragma once
+// СТРОГО ПЕРВЫМ: загрузчик OpenGL
+#include <glad/glad.h>
+
+// Запрещаем GLFW подключать системный <GL/gl.h>
+#define GLFW_INCLUDE_NONE
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
+
+// Сообщаем ImGui, что используется GLAD
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <imgui_impl_opengl3.h>
+
 #include <GLFW/glfw3.h>
 #include "PBRGenerator.h"
+#include "Renderer.h"
 #include <string>
 #include <functional>
 
@@ -21,7 +33,7 @@ public:
     ~TextureEditorPanel();
 
     // Запрет копирования
-    TextureEditorPanel(const TextureEditorPanel&)            = delete;
+    TextureEditorPanel(const TextureEditorPanel&) = delete;
     TextureEditorPanel& operator=(const TextureEditorPanel&) = delete;
 
     // --- Фреймовые вызовы ---
@@ -31,7 +43,7 @@ public:
 
     // Нарисовать панель управления.
     // Возвращает true если параметры изменились и нужна перегенерация.
-    bool drawPanel(GeneratorParams& params, int& viewMode);
+    bool drawPanel(GeneratorParams& params, int& viewMode, LightParams& light);
 
     // Завершить ImGui-фрейм и отправить draw calls на GPU
     void endFrame();

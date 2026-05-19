@@ -16,7 +16,7 @@ TextureEditorPanel::TextureEditorPanel(GLFWwindow* window)
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // навигация с клавиатуры
-    io.IniFilename  = "imgui_pbr.ini"; // сохранение позиций окон
+    io.IniFilename = "imgui_pbr.ini"; // сохранение позиций окон
 
     applyCustomStyle();
 
@@ -45,31 +45,31 @@ void TextureEditorPanel::applyCustomStyle()
     ImGui::StyleColorsDark();
     ImGuiStyle& s = ImGui::GetStyle();
 
-    s.WindowRounding  = 6.0f;
-    s.FrameRounding   = 4.0f;
+    s.WindowRounding = 6.0f;
+    s.FrameRounding = 4.0f;
     s.ScrollbarRounding = 4.0f;
-    s.GrabRounding    = 4.0f;
-    s.WindowPadding   = ImVec2(12.0f, 12.0f);
-    s.FramePadding    = ImVec2(8.0f, 4.0f);
-    s.ItemSpacing     = ImVec2(8.0f, 6.0f);
+    s.GrabRounding = 4.0f;
+    s.WindowPadding = ImVec2(12.0f, 12.0f);
+    s.FramePadding = ImVec2(8.0f, 4.0f);
+    s.ItemSpacing = ImVec2(8.0f, 6.0f);
 
     // Акцентный цвет — оранжевый (напоминает лаву)
     ImVec4* c = s.Colors;
-    c[ImGuiCol_TitleBgActive]  = ImVec4(0.65f, 0.30f, 0.05f, 1.0f);
-    c[ImGuiCol_CheckMark]      = ImVec4(1.00f, 0.65f, 0.10f, 1.0f);
-    c[ImGuiCol_SliderGrab]     = ImVec4(0.90f, 0.50f, 0.05f, 1.0f);
-    c[ImGuiCol_SliderGrabActive]= ImVec4(1.00f, 0.65f, 0.10f, 1.0f);
-    c[ImGuiCol_Button]         = ImVec4(0.50f, 0.25f, 0.05f, 1.0f);
-    c[ImGuiCol_ButtonHovered]  = ImVec4(0.75f, 0.38f, 0.07f, 1.0f);
-    c[ImGuiCol_ButtonActive]   = ImVec4(1.00f, 0.55f, 0.10f, 1.0f);
-    c[ImGuiCol_Header]         = ImVec4(0.60f, 0.28f, 0.05f, 0.80f);
-    c[ImGuiCol_HeaderHovered]  = ImVec4(0.80f, 0.40f, 0.07f, 1.0f);
-    c[ImGuiCol_HeaderActive]   = ImVec4(1.00f, 0.55f, 0.10f, 1.0f);
-    c[ImGuiCol_FrameBg]        = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
+    c[ImGuiCol_TitleBgActive] = ImVec4(0.65f, 0.30f, 0.05f, 1.0f);
+    c[ImGuiCol_CheckMark] = ImVec4(1.00f, 0.65f, 0.10f, 1.0f);
+    c[ImGuiCol_SliderGrab] = ImVec4(0.90f, 0.50f, 0.05f, 1.0f);
+    c[ImGuiCol_SliderGrabActive] = ImVec4(1.00f, 0.65f, 0.10f, 1.0f);
+    c[ImGuiCol_Button] = ImVec4(0.50f, 0.25f, 0.05f, 1.0f);
+    c[ImGuiCol_ButtonHovered] = ImVec4(0.75f, 0.38f, 0.07f, 1.0f);
+    c[ImGuiCol_ButtonActive] = ImVec4(1.00f, 0.55f, 0.10f, 1.0f);
+    c[ImGuiCol_Header] = ImVec4(0.60f, 0.28f, 0.05f, 0.80f);
+    c[ImGuiCol_HeaderHovered] = ImVec4(0.80f, 0.40f, 0.07f, 1.0f);
+    c[ImGuiCol_HeaderActive] = ImVec4(1.00f, 0.55f, 0.10f, 1.0f);
+    c[ImGuiCol_FrameBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
     c[ImGuiCol_FrameBgHovered] = ImVec4(0.30f, 0.20f, 0.10f, 1.0f);
-    c[ImGuiCol_Tab]            = ImVec4(0.35f, 0.18f, 0.04f, 1.0f);
-    c[ImGuiCol_TabActive]      = ImVec4(0.65f, 0.30f, 0.05f, 1.0f);
-    c[ImGuiCol_TabHovered]     = ImVec4(0.80f, 0.40f, 0.07f, 1.0f);
+    c[ImGuiCol_Tab] = ImVec4(0.35f, 0.18f, 0.04f, 1.0f);
+    c[ImGuiCol_TabActive] = ImVec4(0.65f, 0.30f, 0.05f, 1.0f);
+    c[ImGuiCol_TabHovered] = ImVec4(0.80f, 0.40f, 0.07f, 1.0f);
 }
 
 // ============================================================================
@@ -86,7 +86,7 @@ void TextureEditorPanel::beginFrame()
 // drawPanel — главная панель управления генератором
 // Возвращает true если нужна перегенерация текстур
 // ============================================================================
-bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
+bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode, LightParams& light)
 {
     bool changed = false;
 
@@ -96,8 +96,8 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
     ImGui::SetNextWindowCollapsed(false, ImGuiCond_FirstUseEver);
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
-                           | ImGuiWindowFlags_NoScrollbar
-                           | ImGuiWindowFlags_AlwaysAutoResize;
+        | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_AlwaysAutoResize;
 
     if (!ImGui::Begin("PBR Texture Generator", nullptr, flags)) {
         ImGui::End();
@@ -108,8 +108,7 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
     ImGui::SeparatorText("Material");
     {
         static constexpr std::array<const char*, 4> types = {
-            "Stone", "Grass",
-            "Lava",   "Wood"
+            "Stone", "Grass", "Lava", "Wood"
         };
         int prevType = params.materialType;
         if (ImGui::BeginCombo("##material", types[params.materialType])) {
@@ -155,7 +154,7 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Amplitude attenuation between octaves.\n"
-                              "0.5 = standard FBM.");
+                "0.5 = standard FBM.");
     }
 
     {
@@ -166,7 +165,7 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Octave frequency multiplier.\n"
-                              "2.0 = standard FBM.");
+                "2.0 = standard FBM.");
     }
 
     {
@@ -177,7 +176,7 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("UV coordinate divider.\n"
-                              "More = larger pattern.");
+                "More = larger pattern.");
     }
 
     ImGui::Spacing();
@@ -190,7 +189,7 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
         }
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Sobel gradient enhancement.\n"
-                              "More = more pronounced relief in the normal map.");
+                "More = more pronounced relief in the normal map.");
     }
 
     ImGui::Spacing();
@@ -199,15 +198,57 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
     ImGui::SeparatorText("View Mode");
     {
         bool v0 = (viewMode == 0), v1 = (viewMode == 1),
-             v2 = (viewMode == 2), v3 = (viewMode == 3);
+            v2 = (viewMode == 2), v3 = (viewMode == 3),
+            v4 = (viewMode == 4);
 
-        if (ImGui::RadioButton("Diffuse",   v0)) viewMode = 0;
+        if (ImGui::RadioButton("Diffuse", v0)) viewMode = 0;
         ImGui::SameLine();
-        if (ImGui::RadioButton("Height",    v1)) viewMode = 1;
+        if (ImGui::RadioButton("Height", v1)) viewMode = 1;
         ImGui::SameLine();
-        if (ImGui::RadioButton("Normal",    v2)) viewMode = 2;
+        if (ImGui::RadioButton("Normal", v2)) viewMode = 2;
         ImGui::SameLine();
         if (ImGui::RadioButton("Roughness", v3)) viewMode = 3;
+
+        // 3D-режим на отдельной строке (шире остальных)
+        if (ImGui::RadioButton("3D View (Lit Plane)", v4)) viewMode = 4;
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Renders the diffuse+normal+roughness on a 3D plane\n"
+                "with Blinn-Phong lighting and normal mapping.");
+    }
+
+    // ---- Параметры 3D-освещения (показываем только в viewMode==4) ----
+    if (viewMode == 4) {
+        ImGui::Spacing();
+        ImGui::SeparatorText("3D Lighting");
+
+        ImGui::SliderFloat("Light Azimuth", &light.azimuth, 0.0f, 360.0f, "%.0f deg");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Horizontal angle of the directional light.");
+
+        ImGui::SliderFloat("Light Elevation", &light.elevation, 0.0f, 90.0f, "%.0f deg");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Vertical angle of the light.\n0 = horizon, 90 = zenith.");
+
+        ImGui::SliderFloat("Intensity", &light.intensity, 0.1f, 3.0f, "%.2f");
+        ImGui::SliderFloat("Ambient", &light.ambient, 0.0f, 0.5f, "%.2f");
+        ImGui::SliderFloat("Spec Power", &light.specPower, 4.0f, 256.0f, "%.0f");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Blinn-Phong specular exponent.\nHigher = tighter highlight.");
+
+        ImGui::SliderFloat("Spec Intensity", &light.specIntens, 0.0f, 2.0f, "%.2f");
+
+        ImGui::Spacing();
+        ImGui::SeparatorText("Plane Rotation");
+
+        // Вращение вручную или автоматически
+        ImGui::Checkbox("Auto Rotate", &light.autoRotate);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Automatically rotate the plane over time.");
+
+        if (!light.autoRotate) {
+            ImGui::SliderFloat("Rot X", &light.rotAngleX, -1.5f, 1.5f, "%.2f rad");
+            ImGui::SliderFloat("Rot Y", &light.rotAngleY, -3.2f, 3.2f, "%.2f rad");
+        }
     }
 
     ImGui::Spacing();
@@ -224,10 +265,10 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
     }
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Save 4 PPM-files:\n"
-                          "prefix_diffuse.ppm\n"
-                          "prefix_height.ppm\n"
-                          "prefix_normal.ppm\n"
-                          "prefix_roughness.ppm");
+            "prefix_diffuse.ppm\n"
+            "prefix_height.ppm\n"
+            "prefix_normal.ppm\n"
+            "prefix_roughness.ppm");
 
     ImGui::Spacing();
 
@@ -251,7 +292,8 @@ bool TextureEditorPanel::drawPanel(GeneratorParams& params, int& viewMode)
     if (ImGui::CollapsingHeader("Hotkeys")) {
         ImGui::BulletText("ESC - close window");
         ImGui::BulletText("1/2/3/4 - select material");
-        ImGui::BulletText("D/H/N/R - View mode");
+        ImGui::BulletText("D/H/N/R - View mode (2D)");
+        ImGui::BulletText("V - 3D View mode");
         ImGui::BulletText("E - export to .ppm");
         ImGui::BulletText("Space - regenerate");
     }

@@ -14,13 +14,13 @@
 // Параметры генератора — передаются из ImGui-панели
 // ============================================================================
 struct GeneratorParams {
-    int          materialType   = 0;      // 0=Stone 1=Grass 2=Lava 3=Wood
-    unsigned int seed           = 1337;
-    int          octaves        = 6;
-    double       persistence    = 0.5;
-    double       lacunarity     = 2.0;
-    double       baseScale      = 64.0;  // делитель UV (больше = крупнее паттерн)
-    float        normalStrength = 6.0f;  // усиление карты нормалей (Sobel)
+    int          materialType = 0;      // 0=Stone 1=Grass 2=Lava 3=Wood
+    unsigned int seed = 1337;
+    int          octaves = 6;
+    double       persistence = 0.5;
+    double       lacunarity = 2.0;
+    double       baseScale = 64.0;   // делитель UV (больше = крупнее паттерн)
+    float        normalStrength = 6.0f;   // усиление карты нормалей (Sobel)
 };
 
 // ============================================================================
@@ -39,17 +39,17 @@ struct PBRMaps {
     // Карта шероховатости: grayscale, 1 байт на пиксель
     std::vector<uint8_t> roughness;
 
-    int width  = TEX_WIDTH;
+    int width = TEX_WIDTH;
     int height_px = TEX_HEIGHT;
 
     // Инициализация буферов нужного размера
     void allocate(int w, int h) {
-        width     = w;
+        width = w;
         height_px = h;
-        diffuse  .assign(w * h * 3, 0);
-        height   .assign(w * h,     0);
-        normal   .assign(w * h * 3, 0);
-        roughness.assign(w * h,     0);
+        diffuse.assign(static_cast<size_t>(w * h * 3), 0);
+        height.assign(static_cast<size_t>(w * h), 0);
+        normal.assign(static_cast<size_t>(w * h * 3), 0);
+        roughness.assign(static_cast<size_t>(w * h), 0);
     }
 };
 
@@ -60,14 +60,14 @@ struct PBRMaps {
 // Вычислить карту нормалей через оператор Собеля на heightmap
 // strength — коэффициент усиления градиента (рекомендуется 4.0–12.0)
 void computeNormalMap(const std::vector<uint8_t>& heightmap,
-                      std::vector<uint8_t>&        normalmap,
-                      int width, int height, float strength);
+    std::vector<uint8_t>& normalmap,
+    int width, int height, float strength);
 
 // Генераторы материалов (заполняют все 4 буфера в PBRMaps)
 void generateStonePBR(PBRMaps& maps, const GeneratorParams& p);
 void generateGrassPBR(PBRMaps& maps, const GeneratorParams& p);
-void generateLavaPBR (PBRMaps& maps, const GeneratorParams& p);
-void generateWoodPBR (PBRMaps& maps, const GeneratorParams& p);
+void generateLavaPBR(PBRMaps& maps, const GeneratorParams& p);
+void generateWoodPBR(PBRMaps& maps, const GeneratorParams& p);
 
 // Диспетчер: вызывает нужный генератор по params.materialType
 void generatePBR(PBRMaps& maps, const GeneratorParams& params);

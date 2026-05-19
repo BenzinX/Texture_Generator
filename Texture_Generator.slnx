@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Texture_Generator/Texture_Generator.vcxproj" />
+  <Project Path="Texture_Generator/Texture_Generator.vcxproj" Id="eb23d0d3-32ca-48e0-9b9e-2c20ff4154b7" />
 </Solution>
